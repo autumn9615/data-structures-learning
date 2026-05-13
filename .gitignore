@@ -1,0 +1,18 @@
+# Visual Studio
+.vs/
+.vscode/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Build output
+x64/
+Debug/
+Release/
+
+# IDE
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
