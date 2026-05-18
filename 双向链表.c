@@ -14,35 +14,36 @@ typedef struct DNode
 	ElemType data;
 	struct DNode* prior;
 	struct DNode* next;
-}DuLNode, * DLinkList;
+}DuLNode, * DuLinkList;
 
 //初始化双向链表
-Status InitDuList(DLinkList* L)
+Status InitDuList(DuLinkList* L)
 {
 	//开辟内存
-	*L = (DLinkList)malloc(sizeof(DuLNode));
+	*L = (DuLinkList)malloc(sizeof(DuLNode));
 	if (!*L)
 	{
 		return ERROR;
 	}
+	(*L)->data = 0;
 	(*L)->prior = NULL;
 	(*L)->next = NULL;
 	return OK;
 }
 
 //判断双向链表是否为空
-Status ListEmpty(DLinkList L)
+Status ListEmpty(DuLinkList L)
 {
 	return L->next == NULL;
 }
 
 //求双向链表长度
-int ListLength(DLinkList L)
+int ListLength(DuLinkList L)
 {
 	//计数器
 	int len = 0;
 	//指针p指向第一个结点
-	DLinkList p = L->next;
+	DuLinkList p = L->next;
 	while (p != NULL)
 	{
 		len++;
@@ -52,10 +53,10 @@ int ListLength(DLinkList L)
 }
 
 //遍历输出双向链表
-void ListTraverse(DLinkList L)
+void ListTraverse(DuLinkList L)
 {
 	//指针p指向第一个结点
-	DLinkList p = L->next;
+	DuLinkList p = L->next;
 	//检查双向链表是否为空
 	if (p == NULL)
 	{
@@ -65,17 +66,22 @@ void ListTraverse(DLinkList L)
 	//遍历输出
 	while (p != NULL)
 	{
-		printf("%d ", L->data);
+		printf("%d ", p->data);
 		p = p->next;
 	}
 	printf("\n");
 }
 
 //按位取值
-Status GetElem(DLinkList L, int i, ElemType* e)
+Status GetElem(DuLinkList L, int i, ElemType* e)
 {
+	//检查双向链表是否合法
+	if (L == NULL || i <= 0)
+	{
+		return ERROR;
+	}
 	//指针p指向第一个结点
-	DLinkList p = L->next;
+	DuLinkList p = L->next;
 	//计数器
 	int j = 1;
 	//遍历寻找第i个结点
@@ -95,10 +101,10 @@ Status GetElem(DLinkList L, int i, ElemType* e)
 }
 
 //按值查找
-int LocateElem(DLinkList L, ElemType e)
+int LocateElem(DuLinkList L, ElemType e)
 {
 	//指针p指向第一个结点
-	DLinkList p = L->next;
+	DuLinkList p = L->next;
 	//计数器
 	int i = 1;
 	//遍历寻找值为e的结点
@@ -118,205 +124,152 @@ int LocateElem(DLinkList L, ElemType e)
 	}
 }
 
+//在第i个位置插入元素e
+Status ListInsert(DuLinkList L, int i, ElemType e)
+{
+	//检查双向链表是否合法
+	if (L == NULL || i < 1)
+	{
+		return ERROR;
+	}
+	DuLinkList p = L;
+	//计数器
+	int j = 0;
+	//遍历寻找第i-1个结点
+	while (p != NULL && j < i - 1)
+	{
+		p = p->next;
+		j++;
+	}
+	//检查是否找到第i-1个结点
+	if (p == NULL || j > i - 1)
+	{
+		return ERROR;
+	}
+	//创建新结点s存储元素e
+	DuLNode* s = (DuLNode*)malloc(sizeof(DuLNode));
+	if (!s)
+	{
+		return ERROR;
+	}
+	s->data = e;
+	//插入新结点s
+	s->next = p->next;
+	if (p->next != NULL)
+	{
+		p->next->prior = s;
+	}
+	p->next = s;
+	s->prior = p;
+	
+	return OK;
+}
 
+//删除第i个元素
+Status ListDelete(DuLinkList L, int i, ElemType* e)
+{
+	//检查双向链表是否合法
+	if (L == NULL || i < 1 || e == NULL)
+	{
+		return ERROR;
+	}
+	DuLNode* p = L;
+	//计数器
+	int j = 0;
+	//遍历寻找第i-1个结点
+	while (p != NULL && j < i - 1)
+	{
+		p = p->next;
+		j++;
+	}
+	//检查是否找到第i-1个结点
+	if (p == NULL || p->next == NULL)
+	{
+		return ERROR;
+	}
+	//要删除的节点q
+	DuLNode* q = p->next;
+	*e = q->data;
+	//删除
+	p->next = q->next;
+	if (q->next != NULL)
+	{
+		q->next->prior = p;
+	}
+	free(q);
 
+	return OK;
+}
 
+//清空双向链表
+Status ClearDuList(DuLinkList L)
+{
+	DuLinkList p, q;
+	p = L->next;
+	//循环清空下一个
+	while(p != NULL)
+	{
+		q = p->next;
+		free(p);
+		p = q;
+	}
+	//将头结点的next指针置空
+	L->next = NULL;
+	return OK;
+}
 
+//销毁双向链表
+Status DestroyDuList(DuLinkList* L)
+{
+	ClearDuList(*L);
+	free(*L);
+	*L = NULL;
+	return OK;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//#define OK 1
-//#define ERROR 0
-//typedef int Status;
-//typedef int ElemType;
-//
-//// 双向链表结点定义
-//typedef struct DuLNode {
-//    ElemType data;
-//    struct DuLNode* prior;
-//    struct DuLNode* next;
-//} DuLNode, * DuLinkList;
-//
-//// 1. 初始化
-//Status InitDuList(DuLinkList* L) {
-//    *L = (DuLNode*)malloc(sizeof(DuLNode));
-//    if (!*L) return ERROR;
-//    (*L)->prior = NULL;
-//    (*L)->next = NULL;
-//    return OK;
-//}
-//
-//// 2. 判空
-//Status ListEmpty(DuLinkList L) {
-//    return L->next == NULL;
-//}
-//
-//// 3. 求长度
-//int ListLength(DuLinkList L) {
-//    int len = 0;
-//    DuLNode* p = L->next;
-//    while (p) {
-//        len++;
-//        p = p->next;
-//    }
-//    return len;
-//}
-//
-//// 4. 遍历输出
-//void ListTraverse(DuLinkList L) {
-//    DuLNode* p = L->next;
-//    if (!p) {
-//        printf("双向链表为空！\n");
-//        return;
-//    }
-//    while (p) {
-//        printf("%d ", p->data);
-//        p = p->next;
-//    }
-//    printf("\n");
-//}
-//
-//// 5. 按位取值
-//Status GetElem(DuLinkList L, int i, ElemType* e) {
-//    DuLNode* p = L->next;
-//    int j = 1;
-//    while (p && j < i) {
-//        p = p->next;
-//        j++;
-//    }
-//    if (!p || j > i) return ERROR;
-//    *e = p->data;
-//    return OK;
-//}
-//
-//// 6. 按值查找（返回位序，未找到返回0）
-//int LocateElem(DuLinkList L, ElemType e) {
-//    int i = 1;
-//    DuLNode* p = L->next;
-//    while (p && p->data != e) {
-//        p = p->next;
-//        i++;
-//    }
-//    return p ? i : 0;
-//}
-//
-//// 7. 插入（修正 i<1 检查）
-//Status ListInsert(DuLinkList L, int i, ElemType e) {
-//    int j = 0;
-//    DuLNode* p = L;
-//    while (p && j < i - 1) {
-//        p = p->next;
-//        j++;
-//    }
-//    if (!p || i < 1) return ERROR;
-//
-//    DuLNode* s = (DuLNode*)malloc(sizeof(DuLNode));
-//    if (!s) return ERROR;
-//    s->data = e;
-//
-//    s->next = p->next;
-//    if (p->next)
-//        p->next->prior = s;
-//    p->next = s;
-//    s->prior = p;
-//    return OK;
-//}
-//
-//// 8. 删除（增加显式 i<1 判断）
-//Status ListDelete(DuLinkList L, int i, ElemType* e) {
-//    int j = 0;
-//    DuLNode* p = L;
-//    while (p->next && j < i - 1) {
-//        p = p->next;
-//        j++;
-//    }
-//    if (!(p->next) || i < 1) return ERROR;
-//
-//    DuLNode* q = p->next;
-//    *e = q->data;
-//    p->next = q->next;
-//    if (q->next)
-//        q->next->prior = p;
-//    free(q);
-//    return OK;
-//}
-//
-//// 9. 清空
-//Status ClearDuList(DuLinkList L) {
-//    DuLNode* p = L->next, * q;
-//    while (p) {
-//        q = p->next;
-//        free(p);
-//        p = q;
-//    }
-//    L->next = NULL;
-//    return OK;
-//}
-//
-//// 10. 销毁
-//Status DestroyDuList(DuLinkList* L) {
-//    ClearDuList(*L);
-//    free(*L);
-//    *L = NULL;
-//    return OK;
-//}
-//
-//int main() {
-//    DuLinkList L;
-//    ElemType e;
-//    InitDuList(&L);
-//
-//    ListInsert(L, 1, 10);
-//    ListInsert(L, 2, 20);
-//    ListInsert(L, 3, 30);
-//    printf("初始: "); ListTraverse(L);
-//
-//    ListInsert(L, 2, 99);
-//    printf("第2位插入99: "); ListTraverse(L);
-//
-//    ListDelete(L, 3, &e);
-//    printf("删除第3位(%d): ", e); ListTraverse(L);
-//
-//    printf("99的位置: %d\n", LocateElem(L, 99));
-//
-//    ClearDuList(L);
-//    DestroyDuList(&L);
-//    return 0;
-//}
+//主函数
+int main()
+{
+	DuLinkList L;
+	ElemType e;
+	//初始化双向链表
+	InitDuList(&L);
+	printf("双向链表初始化成功!!!\n");
+	//插入元素
+	ListInsert(L, 1, 10);
+	ListInsert(L, 2, 20);
+	ListInsert(L, 3, 30);
+	ListInsert(L, 4, 40);
+	ListInsert(L, 5, 50);
+	printf("双向链表插入元素成功!!!\n");
+	printf("=====================================\n");
+	//输出双向链表
+	printf("插入后双向链表元素为：\n");
+	ListTraverse(L);
+	//插入到第3个位置
+	ListInsert(L, 3, 91);
+	printf("=====================================\n");
+	printf("第3个位置插入元素91后双向链表为：\n");
+	ListTraverse(L);
+	//删除第4个元素
+	ListDelete(L, 4, &e);
+	printf("=====================================\n");
+	printf("删除第4个元素：%d\n", e);
+	printf("删除第4个元素后双向链表为：\n");
+	ListTraverse(L);
+	printf("=====================================\n");
+	//查找第3个元素，按位取值
+	GetElem(L, 3, &e);
+	printf("查找第3个元素\n");
+	printf("第3个元素为：%d\n", e);
+	printf("=====================================\n");
+	//查找第几个元素为40
+	printf("查找第几个元素为40\n");
+	int pos = LocateElem(L, 40);
+	printf("40的位置为：%d\n", pos);
+	printf("=====================================\n");
+	//清空销毁
+	ClearDuList(L);
+	DestroyDuList(&L);
+	return 0;
+}
